@@ -9,7 +9,7 @@ fi
 rm -rf /root/jenkins_home
 mkdir /root/jenkins_home
 
-jenkins_id=$(docker run -d -p 8080:8080 -v /var/run/docker.sock:/var/run/docker.sock -v /root/jenkins_home/:/var/jenkins_home -e "JENKINS_BASE_URL=$DOCS_URL" clemenko/summit19:jenkins)
+jenkins_id=$(docker run -d -p 8080:8080 -v /var/run/docker.sock:/var/run/docker.sock -v /root/jenkins_home/:/var/jenkins_home -e "JENKINS_BASE_URL=$DOCS_URL" e "JENKINS_PASS=admin1234"  clemenko/summit19:jenkins)
 echo $jenkins_id > jenkins.id
 
 echo "========================================================================================================="
@@ -21,8 +21,6 @@ echo "==========================================================================
 echo -n "  Waiting for Jenkins to start ."
 for i in {1..20}; do echo -n "."; sleep 1; done
 echo ""
-
-
 
 echo "========================================================================================================="
 echo ""
