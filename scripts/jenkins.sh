@@ -21,9 +21,7 @@ echo -n "  Waiting for Jenkins to start ."
 for i in {1..20}; do echo -n "."; sleep 1; done
 echo ""
 
-cat > /root/jenkins_home/jenkins.install.InstallUtil.lastExecVersion << EOF
-2.0
-EOF
+echo "2.0" > /root/jenkins_home/jenkins.install.InstallUtil.lastExecVersion
 
 echo "========================================================================================================="
 echo ""
