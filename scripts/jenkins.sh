@@ -21,7 +21,8 @@ echo -n "  Waiting for Jenkins to start ."
 for i in {1..20}; do echo -n "."; sleep 1; done
 echo ""
 
-echo "2.0" > /root/jenkins_home/jenkins.install.InstallUtil.lastExecVersion
+echo "2.164.3" > /root/jenkins_home/jenkins.install.InstallUtil.lastExecVersion
+echo "2.164.3" > /root/jenkins_home/jenkins.install.UpgradeWizard.state
 
 echo "========================================================================================================="
 echo ""
