@@ -39,12 +39,12 @@ In this lab you will integrate Docker Enterprise in to your development pipeline
 > * [Task 5 Pull / Tag / Push Docker Image](#task-5---pull--tag--push-docker-image)
 > * [Task 6 Review Scan Results](#task-6---review-scan-results)
 >   * [Task 6.1 Hide Vulnerabilities](#task-61---hide-vulnerabilities)
-> * [Task 7 Extend with Image Mirroring - Optional](#task-7---extend-with-image-mirroring)
-> * [Task 8 Docker Content Trust / Image Signing - Optional](#task-8---docker-content-trust--image-signing)
+> * [Task 7 Extend with Image Mirroring](#task-7---extend-with-image-mirroring)
+> * [Task 8 Docker Content Trust / Image Signing](#task-8---docker-content-trust--image-signing)
 > * [Task 9 Automate with Jenkins](#task-9---automate-with-jenkins)
 >   * [Task 9.1 Deploy Jenkins](#task-91---deploy-jenkins)
 >   * [Task 9.2 Plumb Jenkins](#task-92---plumb-jenkins)
->   * [Task 9.3 Webhooks - Optional](#task-93---webhooks)
+>   * [Task 9.3 Webhooks](#task-93---webhooks)
 > * [Conclusion](#conclusion)
 
 ## Document conventions
@@ -263,7 +263,7 @@ If we click back to `Tags` we can now see that the image does not have a critica
 
 ![critical](img/cve_no_critical.jpg)
 
-## Task 7 - Extend with Image Mirroring - Optional
+## Task 7 - Extend with Image Mirroring
 
 Docker Trusted Registry allows you to create mirroring policies for a repository. When an image gets pushed to a repository and meets a certain criteria, DTR automatically pushes it to repository in another DTR deployment or Docker Hub.
 
@@ -286,7 +286,7 @@ Since we already had an image that had the tag `promoted` we should see that the
 
 ![more](img/mirror3.jpg)
 
-## Task 8 - Docker Content Trust / Image Signing - Optional
+## Task 8 - Docker Content Trust / Image Signing
 
 Docker Content Trust/Notary provides a cryptographic signature for each image. The signature provides security so that the image requested is the image you get. Read [Notary's Architecture](https://docs.docker.com/notary/service_architecture/) to learn more about how Notary is secure. Since Docker Enterprise is "Secure by Default," Docker Trusted Registry comes with the Notary server out of the box.
 
@@ -436,27 +436,23 @@ In order to automate we need to deploy Jenkins. If you want I can point you to a
 5. One the password is entered click grey "X" in the upper right hand corner. This will cancel out of the installer.
   ![plugins](img/jenkins_plugins.jpg)
 
-9. And we are done installing Jenkins. Click `Start using Jenkins`
+6. And we are done installing Jenkins. Click `Start using Jenkins`
   ![finish](img/jenkins_finish.jpg)
 
 ### Task 9.2 - Plumb Jenkins
 
-Now that we have Jenkins setup and running we need to add 3 additional plugins - Blue Ocean, Generic Webhook Trigger and Pipeline:
+Now that we have Jenkins setup and running we need to add an "item".
 
-1. Click on `Manage Jenkins` --> `Manage Plugins` --> `Available` and filter/search for `Blue Ocean`, `Generic Webhook Trigger` and `Pipeline`. When you have found each one check the checkbox to the left of the plugin name to select for installation.
-
-2. Click on `Install without restart` and wait for the plugins to install. When all plugins have installed navigate back to the Jenkins homepage.
-
-3. Click on `New item` in the upper left.
+1. Click on `New item` in the upper left.
   ![newitem](img/jenkins_newitem.jpg)
 
-4. Enter a name like `ci_summit19`, click `Freestyle project` and then click `OK`.
+2. Enter a name like `ci_summit19`, click `Freestyle project` and then click `OK`.
   ![time](img/jenkins_item.jpg)
 
-5. Let's scroll down to the `Build` section. We will come back to the `Build Triggers` section in a bit. Now click `Add build step` --> `Execute shell`.
+3. Let's scroll down to the `Build` section. We will come back to the `Build Triggers` section in a bit. Now click `Add build step` --> `Execute shell`.
   ![build](img/jenkins_build.jpg)
 
-6. You will now see a text box. Past the following build script into the text box.
+4. You will now see a text box. Past the following build script into the text box.
 
     **Please replace the <DTR_URL> with your URL! `echo $DTR_URL` <-- `worker3`**
 
@@ -480,33 +476,32 @@ Now that we have Jenkins setup and running we need to add 3 additional plugins -
 
       Now scroll down and click `Save`.
 
-7. Now let's run the build. Click `Build now`.
+5. Now let's run the build. Click `Build now`.
   ![now](img/jenkins_buildnow.jpg)
 
-8. You can watch the output of the `Build` by clicking on the task number in the `Build History` and then selecting `Build Output`
+6. You can watch the output of the `Build` by clicking on the task number in the `Build History` and then selecting `Build Output`
   ![history](img/jenkins_bhistory.jpg)
 
-9. The console output will show you all the details from the script execution.
+7. The console output will show you all the details from the script execution.
   ![output](img/jenkins_output.jpg)
 
-10. Review the `ci`/`summit19` repository in DTR. You should now see a bunch of tags that have been promoted.
+8. Review the `ci`/`summit19` repository in DTR. You should now see a bunch of tags that have been promoted.
   ![supply](img/automated_supply.jpg)
 
-### Task 9.3 - Webhooks - Optional
+### Task 9.3 - Webhooks
 
 Now that we have Jenkins setup we can extend with webhooks. In Jenkins speak a webhook is simply a build trigger. Let's configure one.
 
 1. Navigate to Jenkins and click on the project/item called `ci_summit19` and click on `Configure` on the left hand side.
-  ![configure](img/jenkins_configure.jpg)
 
 2. Then scroll down to `Build Triggers`. Check the checkbox for `Trigger builds remotely` and enter a Token of `summit19_rocks`.  Scroll down and click `Save`.
   ![trigger](img/jenkins_triggers.jpg)
 
 3. Now in your browser goto YOUR `http://$DOCS_URL:8080/job/ci_summit19/build?token=summit19_rocks`
 
-    It should look like: `http://ip172-18-0-9-bis91vft0fgg00ctq3i0.direct.ee-beta2.play-with-docker.com:8080/job/ci_summit19/build?token=summit19_rocks`
+    It should look like: `http://ip172-18-0-8-bjmlj2h6u0dg00a2j7n0.direct.beta-hybrid.play-with-docker.com:8080/job/ci_summit19/build?token=summit19_rocks`
 
-4. Check DTR to verify the images were pushed. Then log into `https:hub.docker.com` to see if your images were mirrored.
+4. Check DTR to verify the images were pushed. Then log into `https://hub.docker.com` to see if your images were mirrored.
 
     ![hub_mirror](img/hub_mirror.jpg)
 
