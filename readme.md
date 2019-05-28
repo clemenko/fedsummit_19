@@ -222,7 +222,7 @@ In order to push and pull images to DTR we will need to take advantage of PWD's 
 3. In the console we should already have a variable called `DTR_URL`. Lets check.
 
     ```bash
-    echo $DTR_URL
+    ./fedsummit_19/scripts/pull_tag_push.sh
     ```
 
 ## Task 6 - Review Scan Results

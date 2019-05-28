@@ -15,11 +15,11 @@ fi
 docker login -u jenkins -p $DTR_TOKEN $DTR_URL
 
 #pull
-docker pull clemenko/summit2019:v1
+docker pull clemenko/summit19:v1
 docker pull alpine
 
 #tag
-docker tag clemenko/summit2019:v1 $DTR_URL/ci/summit19_build:v1
+docker tag clemenko/summit19:v1 $DTR_URL/ci/summit19_build:v1
 docker tag alpine $DTR_URL/ci/summit19_build:alpine
 
 #push
