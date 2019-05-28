@@ -16,9 +16,17 @@ echo "  Jenkins URL : http://$DOCS_URL:8080"
 echo ""
 echo "========================================================================================================="
 
-echo -n "  Waiting for Jenkins to start."
+echo -n "  Waiting for Jenkins to start ."
 for i in {1..20}; do echo -n "."; sleep 1; done
 echo ""
+
+cat > /root/jenkins_home/jenkins.model.JenkinsLocationConfiguration.xml << EOF
+<?xml version='1.1' encoding='UTF-8'?>
+<jenkins.model.JenkinsLocationConfiguration>
+  <adminAddress>address not configured yet &lt;nobody@nowhere&gt;</adminAddress>
+  <jenkinsUrl>http://$DOCS_URL:8080/</jenkinsUrl>
+</jenkins.model.JenkinsLocationConfiguration>
+EOF
 
 echo "========================================================================================================="
 echo ""
