@@ -6,7 +6,7 @@ if [ -z ${DOCS_URL+x} ]; then
   . ~/fedsummit_2019/scripts/var_setup.sh
 fi
 
-jenkins_id=$(docker run -d -p 8080:8080 -v /var/run/docker.sock:/var/run/docker.sock clemenko/dc19:jenkins)
+jenkins_id=$(docker run -d -p 8080:8080 -v /var/run/docker.sock:/var/run/docker.sock clemenko/summit19:jenkins)
 echo $jenkins_id > jenkins.id
 
 echo "========================================================================================================="
