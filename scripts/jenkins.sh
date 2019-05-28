@@ -6,7 +6,8 @@ if [ -z ${DOCS_URL+x} ]; then
   . ~/fedsummit_2019/scripts/var_setup.sh
 fi
 
-mkdir jenkins_home
+rm -rf /root/jenkins_home
+mkdir /root/jenkins_home
 jenkins_id=$(docker run -d -p 8080:8080 -v /var/run/docker.sock:/var/run/docker.sock -v /root/jenkins_home/:/var/jenkins_home -p 50000:50000 clemenko/summit19:jenkins)
 echo $jenkins_id > jenkins.id
 
@@ -26,6 +27,13 @@ cat > /root/jenkins_home/jenkins.model.JenkinsLocationConfiguration.xml << EOF
   <adminAddress>address not configured yet &lt;nobody@nowhere&gt;</adminAddress>
   <jenkinsUrl>http://$DOCS_URL:8080/</jenkinsUrl>
 </jenkins.model.JenkinsLocationConfiguration>
+EOF
+
+cat > /root/jenkins_home/jenkins.model.ArtifactManagerConfiguration.xml << EOF
+<?xml version='1.1' encoding='UTF-8'?>
+<jenkins.model.ArtifactManagerConfiguration>
+  <artifactManagerFactories/>
+</jenkins.model.ArtifactManagerConfiguration>
 EOF
 
 echo "========================================================================================================="
