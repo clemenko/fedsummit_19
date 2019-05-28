@@ -7,7 +7,7 @@ if [ -z ${DOCS_URL+x} ]; then
 fi
 
 mkdir jenkins_home
-jenkins_id=$(docker run -d -p 8080:8080 -v /var/run/docker.sock:/var/run/docker.sock -v /root/jenkins/:/var/jenkins_home -p 50000:50000 clemenko/summit19:jenkins)
+jenkins_id=$(docker run -d -p 8080:8080 -v /var/run/docker.sock:/var/run/docker.sock -v /root/jenkins_home/:/var/jenkins_home -p 50000:50000 clemenko/summit19:jenkins)
 echo $jenkins_id > jenkins.id
 
 echo "========================================================================================================="
