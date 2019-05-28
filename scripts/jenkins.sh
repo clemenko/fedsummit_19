@@ -8,7 +8,8 @@ fi
 
 rm -rf /root/jenkins_home
 mkdir /root/jenkins_home
-jenkins_id=$(docker run -d -p 8080:8080 -v /var/run/docker.sock:/var/run/docker.sock -v /root/jenkins_home/:/var/jenkins_home -p 50000:50000 clemenko/summit19:jenkins)
+
+jenkins_id=$(docker run -d -p 8080:8080 -v /var/run/docker.sock:/var/run/docker.sock -v /root/jenkins_home/:/var/jenkins_home -e "JENKINS_BASE_URL=$DOCS_URL" clemenko/summit19:jenkins)
 echo $jenkins_id > jenkins.id
 
 echo "========================================================================================================="
@@ -21,8 +22,7 @@ echo -n "  Waiting for Jenkins to start ."
 for i in {1..20}; do echo -n "."; sleep 1; done
 echo ""
 
-echo "2.164.3" > /root/jenkins_home/jenkins.install.InstallUtil.lastExecVersion
-echo "2.164.3" > /root/jenkins_home/jenkins.install.UpgradeWizard.state
+
 
 echo "========================================================================================================="
 echo ""
