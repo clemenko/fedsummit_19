@@ -39,12 +39,12 @@ In this lab you will integrate Docker Enterprise in to your development pipeline
 > * [Task 5 Pull / Tag / Push Docker Image](#task-5---pull--tag--push-docker-image)
 > * [Task 6 Review Scan Results](#task-6---review-scan-results)
 >   * [Task 6.1 Hide Vulnerabilities](#task-61---hide-vulnerabilities)
-> * [Task 7 Extend with Image Mirroring](#task-7---extend-with-image-mirroring)
-> * [Task 8 Docker Content Trust / Image Signing](#task-8---docker-content-trust--image-signing)
+> * [Task 7 Extend with Image Mirroring - Optional](#task-7---extend-with-image-mirroring)
+> * [Task 8 Docker Content Trust / Image Signing - Optional](#task-8---docker-content-trust--image-signing)
 > * [Task 9 Automate with Jenkins](#task-9---automate-with-jenkins)
 >   * [Task 9.1 Deploy Jenkins](#task-91---deploy-jenkins)
 >   * [Task 9.2 Plumb Jenkins](#task-92---plumb-jenkins)
->   * [Task 9.3 Webhooks](#task-93---webhooks)
+>   * [Task 9.3 Webhooks - Optional](#task-93---webhooks)
 > * [Conclusion](#conclusion)
 
 ## Document conventions
@@ -237,11 +237,11 @@ Lets take a good look at the scan results from the images. Please keep in mind t
 
 2. Take a look at the details to see exactly what piece of the image is vulnerable.
 
-     Click `View details` for an image that has vulnerabilities. How about `0.2`? There are two views for the scanning results, **Layers** and **Components**. The **Layers** view shows which layer of the image had the vulnerable binary. This is extremely useful when diagnosing where the vulnerability is in the Dockerfile.
+     Click `View details` for an image that has vulnerabilities. How about `flask`? There are two views for the scanning results, **Layers** and **Components**. The **Layers** view shows which layer of the image had the vulnerable binary. This is extremely useful when diagnosing where the vulnerability is in the Dockerfile.
 
      ![list](img/image_view.jpg)
 
-    The vulnerable binary is displayed, along with all the other contents of the layer, when you click the layer itself. In this example there are a few potentially vulnerable binaries:
+    Now lets look at the Components view. The vulnerable binary is displayed, along with all the other contents of the layer, when you click the layer itself. In this example there are a few potentially vulnerable binaries:
 
     ![list](img/image_comp.jpg)
 
@@ -263,9 +263,7 @@ If we click back to `Tags` we can now see that the image does not have a critica
 
 ![critical](img/cve_no_critical.jpg)
 
-Once we have hidden some CVEs we might want to perform a manual promotion of the image.
-
-## Task 7 - Extend with Image Mirroring
+## Task 7 - Extend with Image Mirroring - Optional
 
 Docker Trusted Registry allows you to create mirroring policies for a repository. When an image gets pushed to a repository and meets a certain criteria, DTR automatically pushes it to repository in another DTR deployment or Docker Hub.
 
@@ -288,7 +286,7 @@ Since we already had an image that had the tag `promoted` we should see that the
 
 ![more](img/mirror3.jpg)
 
-## Task 8 - Docker Content Trust / Image Signing
+## Task 8 - Docker Content Trust / Image Signing - Optional
 
 Docker Content Trust/Notary provides a cryptographic signature for each image. The signature provides security so that the image requested is the image you get. Read [Notary's Architecture](https://docs.docker.com/notary/service_architecture/) to learn more about how Notary is secure. Since Docker Enterprise is "Secure by Default," Docker Trusted Registry comes with the Notary server out of the box.
 
@@ -296,49 +294,37 @@ We can create policy enforcement within Universal Control Plane (UCP) such that 
 
 Let's sign your first Docker image?
 
-1. Right now you should have a promoted image `$DTR_URL/ci/summit19:0.2`. We need to tag it with a new `signed` tag.
+1. Right now you should have a promoted image `$DTR_URL/ci/summit19:flask`. We need to tag it with a new `signed` tag.
 
    ```bash
-   docker pull $DTR_URL/ci/summit19:0.2
-   docker tag $DTR_URL/ci/summit19:0.2 $DTR_URL/ci/summit19:signed
+   docker pull $DTR_URL/ci/summit19:flask
+   docker tag $DTR_URL/ci/summit19:flask $DTR_URL/ci/summit19:signed
    ```
 
-2. Now lets use the Trust command... It will ask you for a BUNCH of passwords. Do yourself a favor in this workshop and use `admin1234`. :D
+2. Now lets use the Trust command... It will ask you for a BUNCH of passwords. Do yourself a favor in this workshop and use `admin1234`. We can even use a variable for this.
 
     ```bash
+    export DOCKER_CONTENT_TRUST_ROOT_PASSPHRASE="admin1234"
+    export DOCKER_CONTENT_TRUST_REPOSITORY_PASSPHRASE="admin1234"
     docker trust sign $DTR_URL/ci/summit19:signed
     ```
 
     Here is an example output:
 
     ```bash
-    [worker3] (local) root@10.20.0.42 ~
-    $ docker trust sign $DTR_URL/ci/summit19:signed
-    You are about to create a new root signing key passphrase. This passphrase
-    will be used to protect the most sensitive key in your signing system. Please
-    choose a long, complex passphrase and be careful to keep the password and the
-    key file itself secure and backed up. It is highly recommended that you use a
-    password manager to generate the passphrase and keep it safe. There will be no
-    way to recover this key. You can find the key in your config directory.
-    Enter passphrase for new root key with ID b975982:
-    Repeat passphrase for new root key with ID b975982:
-    Enter passphrase for new repository key with ID 61a14ae:
-    Repeat passphrase for new repository key with ID 61a14ae:
-    Enter passphrase for new jenkins key with ID ab5049d:
-    Repeat passphrase for new jenkins key with ID ab5049d:
+    [worker3] (local) root@10.20.0.11 ~
+    $     docker trust sign $DTR_URL/ci/summit19:signed
     Created signer: jenkins
-    Finished initializing signed repository for ip172-18-0-5-bfu00sinjdg00099igu0.direct.ee-beta2.play-with-docker.com/ci/summit19:signed
-    Signing and pushing trust data for local image ip172-18-0-5-bfu00sinjdg00099igu0.direct.ee-beta2.play-with-docker.com/ci/summit19:signed, may overwrite remote trust data
-    The push refers to repository [ip172-18-0-5-bfu00sinjdg00099igu0.direct.ee-beta2.play-with-docker.com/ci/summit19]
-    af9af2170d23: Layer already exists
-    cd9a82baa926: Layer already exists
-    c60ea83f6a45: Layer already exists
-    cd7100a72410: Layer already exists
-    signed: digest: sha256:5554013b565fc0ccf080f7cf4ad096ffb1dbc4f83496a86f9efa1252f26ed455 size: 1156
+    Finished initializing signed repository for ip172-18-0-7-bjmlj2h6u0dg00a2j7n0.direct.beta-hybrid.play-with-docker.com/ci/summit19:signed
+    Signing and pushing trust data for local image ip172-18-0-7-bjmlj2h6u0dg00a2j7n0.direct.beta-hybrid.play-with-docker.com/ci/summit19:signed, may overwrite remote trust data
+    The push refers to repository [ip172-18-0-7-bjmlj2h6u0dg00a2j7n0.direct.beta-hybrid.play-with-docker.com/ci/summit19]
+    79d8c9b0c7eb: Layer already exists
+    73b1d8895770: Layer already exists
+    758b3ad582e9: Layer already exists
+    f1b5933fe4b5: Layer already exists
+    signed: digest: sha256:dfd465db73b8fd3d4d64175f11dc38725913b49a2e59d82a70c75a2892f621a2 size: 1156
     Signing and pushing trust metadata
-    Enter passphrase for jenkins key with ID ab5049d:
-    Successfully signed ip172-18-0-5-bfu00sinjdg00099igu0.direct.ee-beta2.play-with-docker.com/ci/summit19:signed
-    [worker3] (local) root@10.20.0.42 ~
+    Successfully signed ip172-18-0-7-bjmlj2h6u0dg00a2j7n0.direct.beta-hybrid.play-with-docker.com/ci/summit19:signed
     ```
 
     Again please use the same password. It will simplify this part of the workshop.
@@ -352,15 +338,15 @@ Let's sign your first Docker image?
     Here is the example output:
 
       ```bash
-      [worker3] (local) root@10.20.0.42 ~
-      $ docker trust inspect $DTR_URL/ci/summit19:signed
-      [
+    [worker3] (local) root@10.20.0.11 ~
+    $ docker trust inspect $DTR_URL/ci/summit19:signed
+    [
         {
-            "Name": "ip172-18-0-5-bfu00sinjdg00099igu0.direct.ee-beta2.play-with-docker.com/ci/summit19:signed",
+            "Name": "ip172-18-0-7-bjmlj2h6u0dg00a2j7n0.direct.beta-hybrid.play-with-docker.com/ci/summit19:signed",
             "SignedTags": [
                 {
                     "SignedTag": "signed",
-                    "Digest": "5554013b565fc0ccf080f7cf4ad096ffb1dbc4f83496a86f9efa1252f26ed455",
+                    "Digest": "dfd465db73b8fd3d4d64175f11dc38725913b49a2e59d82a70c75a2892f621a2",
                     "Signers": [
                         "jenkins"
                     ]
@@ -371,7 +357,7 @@ Let's sign your first Docker image?
                     "Name": "jenkins",
                     "Keys": [
                         {
-                            "ID": "ab5049def46b1b8070891981afe6091f95bf9017cdfc447866917f342810a302"
+                            "ID": "2e78226bb7144f8af1d416984e20fa688de714570a1841395dd5b55950cb65d0"
                         }
                     ]
                 }
@@ -381,7 +367,7 @@ Let's sign your first Docker image?
                     "Name": "Root",
                     "Keys": [
                         {
-                            "ID": "59eaa1440dfc9fbf709a9640e8b8fbcb636b019f6f70aa90451f361bbd1ecf58"
+                            "ID": "1330c69fa43a6ab40e286876efdb31c0de2aa3fb6b84b9f74fcc3a1b77bb55ad"
                         }
                     ]
                 },
@@ -389,14 +375,13 @@ Let's sign your first Docker image?
                     "Name": "Repository",
                     "Keys": [
                         {
-                            "ID": "61a14ae35425dde74summit5d18b292c613f613b357051862c18ca5d0a02a2f0d04e"
+                            "ID": "c2265b8fde8433dd01986815a879af71dcbb9607197c65dbd6fd96b3e02a74a8"
                         }
                     ]
                 }
             ]
         }
-      ]
-      [worker3] (local) root@10.20.0.42 ~
+    ]
       ```
 
 4. Back in DTR, Navigate to `Repositories` --> `ci`/`summit19` --> `Tags` and you will now see the new `signed` tag with the text `Signed` under the `Signed` column:
@@ -421,7 +406,7 @@ In order to automate we need to deploy Jenkins. If you want I can point you to a
     cat ./fedsummit_19/scripts/jenkins.sh
     ```
 
-2. Then run unset Docker Content Trust and instal Jenkins.
+2. Then install Jenkins.
 
     ```bash
     ./fedsummit_19/scripts/jenkins.sh
@@ -430,17 +415,17 @@ In order to automate we need to deploy Jenkins. If you want I can point you to a
 3. Pay attention to the url AND Jenkins password. It will look like :
 
     ```bash
-    [worker3] (local) root@10.20.0.25 ~/
-    $ fedsummit_19/scripts/jenkins.sh
+    [worker3] (local) root@10.20.0.11 ~
+    $ ./fedsummit_19/scripts/jenkins.sh
     =========================================================================================================
 
-      Jenkins URL : http://ip172-18-0-20-bcelih5dffhg00b2thog.direct.ee-beta2.play-with-docker.com:8080
+      Jenkins URL : http://ip172-18-0-8-bjmlj2h6u0dg00a2j7n0.direct.beta-hybrid.play-with-docker.com:8080
 
     =========================================================================================================
-      Waiting for Jenkins to start................
+      Waiting for Jenkins to start.....................
     =========================================================================================================
 
-      Jenkins Setup Password = d32eda1cf2464b818826fd82b4f7c2cb
+      Jenkins Setup Password = 9a64091d98d5460b8675de99ebd0b8f2
 
     =========================================================================================================
     ```
@@ -448,17 +433,8 @@ In order to automate we need to deploy Jenkins. If you want I can point you to a
 4. Now navigate to `http://$DOCS_URL:8080` by clicking on the url in the terminal. Let's start the setup of Jenkins and enter the password. It may take a minute or two for the `Unlock Jenkins` page to load. Be patient.
   ![token](img/jenkins_token.jpg)
 
-5. Click `Select plugins to install`.
-  ![plugins](img/jenkins_plugins1.jpg)
-
-6. We don't need to install all plugins at this point. Click `none` at the top.
-  ![none](img/jenkins_none.jpg)
-
-7. Next Click `Continue as admin` in the lower right hand corner. We don't need to create another username for Jenkins.
-  ![continue](img/jenkins_continue.jpg)
-
-8. Next for Instance Configuration click `Save and Finish`.
-  ![instance](img/jenkins_instance.jpg)
+5. One the password is entered click grey "X" in the upper right hand corner. This will cancel out of the installer.
+  ![plugins](img/jenkins_plugins.jpg)
 
 9. And we are done installing Jenkins. Click `Start using Jenkins`
   ![finish](img/jenkins_finish.jpg)
@@ -490,13 +466,13 @@ Now that we have Jenkins setup and running we need to add 3 additional plugins -
 
     docker login -u admin -p admin1234 $DTR_URL
 
-    docker pull clemenko/summit19:0.2
+    docker pull clemenko/summit19:alpine
 
-    docker tag clemenko/summit19:0.2 $DTR_URL/ci/summit19_build:jenkins_$BUILD_NUMBER
+    docker tag clemenko/summit19:alpine $DTR_URL/ci/summit19_build:jenkins_$BUILD_NUMBER
 
     docker push $DTR_URL/ci/summit19_build:jenkins_$BUILD_NUMBER
 
-    docker rmi clemenko/summit19:0.2 $DTR_URL/ci/summit19_build:jenkins_$BUILD_NUMBER
+    docker rmi clemenko/summit19:alpine $DTR_URL/ci/summit19_build:jenkins_$BUILD_NUMBER
     ```
 
     It will look very similar to:
@@ -516,7 +492,7 @@ Now that we have Jenkins setup and running we need to add 3 additional plugins -
 10. Review the `ci`/`summit19` repository in DTR. You should now see a bunch of tags that have been promoted.
   ![supply](img/automated_supply.jpg)
 
-### Task 9.3 - Webhooks
+### Task 9.3 - Webhooks - Optional
 
 Now that we have Jenkins setup we can extend with webhooks. In Jenkins speak a webhook is simply a build trigger. Let's configure one.
 
