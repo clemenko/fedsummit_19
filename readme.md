@@ -13,7 +13,7 @@ https://dockr.ly/masummit
 
 In this lab you will integrate Docker Enterprise in to your development pipeline. You will push an image to the Docker Trusted Registry (DTR). DTR will scan your image for vulnerabilities so they can be fixed before your application is deployed. This helps you build more secure apps!
 
-> **Difficulty**: Intermediate
+> **Difficulty**: Beginner
 >
 > **Time**: Approximately 30 minutes
 >
@@ -138,14 +138,6 @@ Before we create the repositories, let's start with enabling the Docker Image Sc
 
 In order to setup our automation we need to create an organization and a user account for Jenkins. We are going to create a user named `jenkins` in the organization `ci`.
 
-From the main PWD screen click the `DTR` button on the left side of the screen
-
-  > **Note**: Because this is a lab-based install of Docker Enterprise we are using the default self-signed certs. Because of this your browser may display a security warning. It is safe to click through this warning.
-  >
-  > In a production environment you would use certs from a trusted certificate authority and would not see this screen.
-  >
-  > ![ssl_error](./img/ssl_error.png)
-
 ### Task 3.1 - Create Jenkins Organization
 
 1. From the `PWD` main page click on `DTR`.
@@ -177,7 +169,8 @@ While remaining in DTR we can create the user from here.
 5. Now we need to set the password for the Jenkins user on `worker3`. Replace your password for the <PASSWORD> below.
 
     ```bash
-    export DTR_TOKEN=<PASSWORD>
+    #export DTR_TOKEN=<PASSWORD>
+    export DTR_TOKEN=admin1234
     ```
 
 ## Task 4 - Create DTR Repositories
