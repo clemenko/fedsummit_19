@@ -6,9 +6,6 @@
 * Twitter : [@clemenko](https://twitter.com/clemenko)
 * Email : [clemenko@docker.com](mailto:clemenko@docker.com)
 
-https://dockr.ly/masummit
-
-
 ---
 
 In this lab you will integrate Docker Enterprise in to your development pipeline. You will push an image to the Docker Trusted Registry (DTR). DTR will scan your image for vulnerabilities so they can be fixed before your application is deployed. This helps you build more secure apps!
@@ -68,7 +65,7 @@ This lab requires an instance of Docker Enterprise. Docker Enterprise includes D
 
 ## Understanding the Play With Docker Interface
 
-![pwd screen](./img/pwd_screen.jpg)
+![pwd screen](img/pwd_screen.jpg)
 
 This workshop is only available to people in a pre-arranged workshop. That may happen through a [Docker Meetup](https://events.docker.com/chapters/), a conference workshop that is being led by someone who has made these arrangements, or special arrangements between Docker and your company. The workshop leader will provide you with the URL to a workshop environment that includes [Docker Enterprise](https://www.docker.com/enterprise-edition). The environment will be based on [Play with Docker](https://labs.play-with-docker.com/).
 
@@ -166,7 +163,7 @@ While remaining in DTR we can create the user from here.
 
     ![admin](img/org_admin.jpg)
 
-5. Now we need to set the password for the Jenkins user on `worker3`. Replace your password for the <PASSWORD> below.
+5. Now we need to set the password for the Jenkins user on `worker3`. Replace your password for the `<PASSWORD>` below.
 
     ```bash
     #export DTR_TOKEN=<PASSWORD>
@@ -188,6 +185,7 @@ Since we used `git clone` to copy the repository to `worker3` for this workshop,
 ```bash
 ./fedsummit_19/scripts/create_repos.sh
 ```
+
 This script will also create the Promotion Policy we will discuss further.
 
 **Hard Way:**
@@ -209,7 +207,7 @@ With the two repositories setup we can now define the promotion policy. No we ca
 1. Navigate to the `ci`/`summit19_build` repository. Click `Promotions` and click "eye" on the right of the policy that was created from the scripts in a earlier task.
   ![create](img/review_policy.jpg)
 
-    Notice there are a lot of options for Criterias for triggerin promotions. This allows for a lot of customization. When we push any image to `ci`/`summit19_build` it will get scanned. Based on that scan report we could see the image moved to `ci`/`summit19`. Lets push a few images to see if it worked.
+    Notice there are a lot of options for Criteria for triggering promotions. This allows for a lot of customization. When we push any image to `ci`/`summit19_build` it will get scanned. Based on that scan report we could see the image moved to `ci`/`summit19`. Lets push a few images to see if it worked.
 
 ## Task 5 - Pull / Tag / Push Docker Image
 
@@ -267,7 +265,7 @@ If we click back to `Tags` we can now see that the image does not have a critica
 
 Docker Trusted Registry allows you to create mirroring policies for a repository. When an image gets pushed to a repository and meets a certain criteria, DTR automatically pushes it to repository in another DTR deployment or Docker Hub.
 
-This not only allows you to mirror images but also allows you to create image promotion pipelines that span multiple DTR deployments and datacenters. Let's set one up. How about we mirror an image to [hub.docker.com](https://hub.docker.com)?
+This not only allows you to mirror images but also allows you to create image promotion pipelines that span multiple DTR deployments and data centers. Let's set one up. How about we mirror an image to [hub.docker.com](https://hub.docker.com)?
 
 1. Go to [hub.docker.com](https://hub.docker.com) and create an login and repository.
 
