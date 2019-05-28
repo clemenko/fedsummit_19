@@ -188,6 +188,7 @@ Since we used `git clone` to copy the repository to `worker3` for this workshop,
 ```bash
 ./fedsummit_19/scripts/create_repos.sh
 ```
+This script will also create the Promotion Policy we will discuss further.
 
 **Hard Way:**
 
@@ -201,19 +202,14 @@ Since we used `git clone` to copy the repository to `worker3` for this workshop,
 5. We should have two repositories now.
   ![new_repo](img/repo_list.jpg)
 
-### Task 4.1 - Create Promotion Policy - Private to Public
+### Task 4.1 - Review Promotion Policy - Private to Public
 
-With the two repositories setup we can now define the promotion policy. The first policy we are going to create is for promoting an image that has passed a scan with zero (0) **Critical** vulnerabilities. The policy will target the `ci`/`summit19` repository.
+With the two repositories setup we can now define the promotion policy. No we can review the policy for the `ci`/`summit19` repository.
 
-1. Navigate to the `ci`/`summit19_build` repository. Click `Promotions` and click `New promotion policy`. Note: Make sure the `Is source` box is
-selected.
-  ![create](img/create_policy.jpg)
+1. Navigate to the `ci`/`summit19_build` repository. Click `Promotions` and click "eye" on the right of the policy that was created from the scripts in a earlier task.
+  ![create](img/review_policy.jpg)
 
-2. In the `PROMOTE TO TARGET IF...` box select `Critical Vulnerabilities` and then check `less than or equals`. In the box below `equals` enter the number zero (4) and click `Add`.
-3. Set the `TARGET REPOSITORY` to `ci`/`summit19` and click `Save & Apply`.
-  ![promo](img/promo_policy.jpg)
-
-When we push an image to `ci`/`summit19_build` it will get scanned. Based on that scan report we could see the image moved to `ci`/`summit19`. Lets push a few images to see if it worked.
+    Notice there are a lot of options for Criterias for triggerin promotions. This allows for a lot of customization. When we push any image to `ci`/`summit19_build` it will get scanned. Based on that scan report we could see the image moved to `ci`/`summit19`. Lets push a few images to see if it worked.
 
 ## Task 5 - Pull / Tag / Push Docker Image
 
@@ -228,8 +224,6 @@ In order to push and pull images to DTR we will need to take advantage of PWD's 
     ```bash
     echo $DTR_URL
     ```
-
-    If you are not sure please follow [Task 1.1 Set Up Environment Variables](#task-11---set-up-environment-variables).
 
 ## Task 6 - Review Scan Results
 
