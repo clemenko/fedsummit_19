@@ -5,4 +5,5 @@ export DTR_USERNAME=admin
 export UCP_URL="$(curl -sS https://${PWD_HOST_FQDN}/sessions/${SESSION_ID} | jq -r '.instances[] | select(.hostname == "manager1") | .proxy_host').direct.${PWD_HOST_FQDN}"
 export DOCS_URL="$(curl -sS https://${PWD_HOST_FQDN}/sessions/${SESSION_ID} | jq -r '.instances[] | select(.hostname == "worker3") | .proxy_host').direct.${PWD_HOST_FQDN}"
 export NOTARY_OPTS="-d ${HOME}/.docker/trust -s https://${DTR_URL} --tlscacert /usr/local/share/ca-certificates/${DTR_URL}.crt"
-export PATH=$PATH:/root/dc19_supply_chain/
+export PATH=$PATH:/root/fedsummit_2019/
+export DTR_ADMIN_PASSWORD="admin1234"

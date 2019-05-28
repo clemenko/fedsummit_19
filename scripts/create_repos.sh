@@ -14,9 +14,9 @@ curl -X POST -k -L \
   "enableManifestLists": false,
   "immutableTags": false,
   "longDescription": "",
-  "name": "dc19",
+  "name": "summit19",
   "scanOnPush": true,
-  "shortDescription": "Dockercon 2019 Example - public",
+  "shortDescription": "Docker Summit 2019 Example - public",
   "visibility": "public"
 }'
 
@@ -28,9 +28,9 @@ curl -X POST -k -L \
   "enableManifestLists": false,
   "immutableTags": true,
   "longDescription": "",
-  "name": "dc19_build",
+  "name": "summit19_build",
   "scanOnPush": true,
-  "shortDescription": "Dockercon 2019 Example - private",
+  "shortDescription": "Docker Summit Example - private",
   "visibility": "private"
 }'
 

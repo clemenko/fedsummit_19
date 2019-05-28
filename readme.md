@@ -1,4 +1,4 @@
-# Building a Secure, Automated Supply Chain - Dockercon 2019
+# Building a Secure, Automated Supply Chain - Mid Atlantic Summit 2019
 
 ## Who am i
 
@@ -6,13 +6,16 @@
 * Twitter : [@clemenko](https://twitter.com/clemenko)
 * Email : [clemenko@docker.com](mailto:clemenko@docker.com)
 
+https://dockr.ly/masummit
+
+
 ---
 
 In this lab you will integrate Docker Enterprise in to your development pipeline. You will push an image to the Docker Trusted Registry (DTR). DTR will scan your image for vulnerabilities so they can be fixed before your application is deployed. This helps you build more secure apps!
 
 > **Difficulty**: Intermediate
 >
-> **Time**: Approximately 90 minutes
+> **Time**: Approximately 30 minutes
 >
 > **Tasks**:
 >
@@ -31,7 +34,6 @@ In this lab you will integrate Docker Enterprise in to your development pipeline
 > * [Task 3 Create Jenkins User and Organization](#task-3---create-jenkins-user-and-organization)
 >   * [Task 3.1 Create Jenkins Organization](#task-31---create-jenkins-organization)
 >   * [Task 3.2 Create Jenkins User](#task-32---create-jenkins-user)
->   * [Task 3.3 Create Jenkins DTR Token](#task-33--create-jenkins-dtr-token)
 > * [Task 4: Create DTR Repositories](#task-4---create-dtr-repositories)
 >   * [Task 4.1 Create Promotion Policy - Private to Public](#task-41---create-promotion-policy---private-to-public)
 > * [Task 5 Pull / Tag / Push Docker Image](#task-5---pull--tag--push-docker-image)
@@ -113,38 +115,36 @@ We are going to use `worker3` for **ALL** our command line work. Click on `worke
 Now we need to setup a few variables. We need to create `DTR_URL` and `DTR_USERNAME`. But the easiest way is to clone the Workshop Repo and run script.
 
 ```bash
-git clone https://github.com/clemenko/dc19_supply_chain.git
+git clone https://github.com/clemenko/fedsummit_19.git
 ```
 
 Once cloned, now we can run the `var_setup.sh` script.
 
 ```bash
-. dc19_supply_chain/scripts/var_setup.sh
+source fedsummit_19/scripts/var_setup.sh
 ```
 
 Now your PWD environment variables are setup. We will use the variables for some scripting.
 
 ## Task 2 - Enable Docker Image Scanning
 
-Before we create the repositories, let's start with enabling the Docker Image Scanning engine.
+Before we create the repositories, let's start with enabling the Docker Image Scanning engine. Good thing there is a scrip for that.
 
-1. From the main PWD screen click the `DTR` button on the left side of the screen
-
-    > **Note**: Because this is a lab-based install of Docker Enterprise we are using the default self-signed certs. Because of this your browser may display a security warning. It is safe to click through this warning.
-    >
-    > In a production environment you would use certs from a trusted certificate authority and would not see this screen.
-    >
-    > ![ssl_error](./img/ssl_error.png)
-
-2. Navigate to `System` on the left pane, then `Security`.
-    ![scanning](img/system_scanning.jpg)
-
-3. Select `Enable Scanning`. Leave it in `Online` mode and select `Enable`. Press the button `Enable Online Scanning`. The CVE database will start downloading. This can take a few minutes. Please be patient for it to complete.
-    ![enable_scan](img/scanning_enable.jpg)
+```bash
+source fedsummit_19/scripts/enable_scanning.sh
+```
 
 ## Task 3 - Create Jenkins User and Organization
 
 In order to setup our automation we need to create an organization and a user account for Jenkins. We are going to create a user named `jenkins` in the organization `ci`.
+
+From the main PWD screen click the `DTR` button on the left side of the screen
+
+  > **Note**: Because this is a lab-based install of Docker Enterprise we are using the default self-signed certs. Because of this your browser may display a security warning. It is safe to click through this warning.
+  >
+  > In a production environment you would use certs from a trusted certificate authority and would not see this screen.
+  >
+  > ![ssl_error](./img/ssl_error.png)
 
 ### Task 3.1 - Create Jenkins Organization
 
@@ -170,31 +170,15 @@ While remaining in DTR we can create the user from here.
 
     ![newuser](img/new_user.jpg)
 
-Now change the permissions for the `jenkins` account to `Org Owner`.
+4. Now change the permissions for the `jenkins` account to `Org Owner`.
 
-![admin](img/org_admin.jpg)
+    ![admin](img/org_admin.jpg)
 
-### Task 3.3 - Create Jenkins DTR Token
+5. Now we need to set the password for the Jenkins user on `worker3`. Replace your password for the <PASSWORD> below.
 
-Now that we have the `jenkins` user created we need to add a token for use with DTR's API.
-
-Navigate to `Users` on the left pane. Click on `jenkins`, then click the `Access Tokens` tab.
-
-![token](img/token.jpg)
-
-Click `New access token`. Enter `Supply Chain` into the description field and click `Create`.
-
-**Write down the token that is displayed. You will need this again!**
-
-It should look like `ee9d7ff2-6fd4-4a41-9971-789e06e0d5d5`. Click `Done`.
-
-Lets add it to the `worker3` environment. Replace `<TOKEN>` with the token from DTR.
-
-```bash
-#example
-#export DTR_TOKEN=ee9d7ff2-6fd4-4a41-9971-789e06e0d5d5
-export DTR_TOKEN=<TOKEN>
-```
+    ```bash
+    export DTR_TOKEN=<PASSWORD>
+    ```
 
 ## Task 4 - Create DTR Repositories
 
@@ -202,83 +186,41 @@ We now need to access Docker Trusted Registry to setup two repositories.
 
 We have an easy way with a script or the hard way by using the GUI.
 
-Either way we need to create two repositories, `dc19_build` and `dc19`. `dc19_build` will be used for the private version of the image. `dc19` will be the public version once an CVE scan is complete.
+Either way we need to create two repositories, `summit19_build` and `summit19`. `summit19_build` will be used for the private version of the image. `summit19` will be the public version once an CVE scan is complete.
 
 **Easy Way:**
 
 Since we used `git clone` to copy the repository to `worker3` for this workshop, there is a script from that will create the DTR repositories.
 
 ```bash
-./dc19_supply_chain/scripts/create_repos.sh
-```
-
-Feel free to `cat` the file to see how we are using `curl` and the API to create the repositories.
-
-```bash
-[worker3] (local) root@10.20.0.38 ~
-$ cat dc19_supply_chain/scripts/create_repos.sh
-#!/bin/bash
-# requires environment variables: DTR_HOST, DTR_USERNAME and DTR_TOKEN
-
-if [ -z "$DTR_TOKEN" ]; then
-  echo " Please create a DTR_TOKEN variable before preceding..."
-  exit
-fi
-
-curl -X POST -k -L \
-  -u $DTR_USERNAME:$DTR_TOKEN \
-  https://$DTR_URL/api/v0/repositories/ci \
-  -H 'Content-Type: application/json' \
-  -d '{
-  "enableManifestLists": true,
-  "immutableTags": true,
-  "longDescription": "",
-  "name": "dc19",
-  "scanOnPush": true,
-  "shortDescription": "Dockercon 2019 Example - public",
-  "visibility": "public"
-}'
-
-curl -X POST -k -L \
-  -u $DTR_USERNAME:$DTR_TOKEN \
-  https://$DTR_URL/api/v0/repositories/ci \
-  -H 'Content-Type: application/json' \
-  -d '{
-  "enableManifestLists": true,
-  "immutableTags": true,
-  "longDescription": "",
-  "name": "dc19_build",
-  "scanOnPush": true,
-  "shortDescription": "Dockercon 2019 Example - private",
-  "visibility": "public"
-}'
+./fedsummit_19/scripts/create_repos.sh
 ```
 
 **Hard Way:**
 
 1. Navigate to `Repositories` on the left menu and click `New repository`.
-2. Create that looks like `ci`/`dc19_build`. Make sure you click `Private`. Do not click `Create` yet!
+2. Create that looks like `ci`/`summit19_build`. Make sure you click `Private`. Do not click `Create` yet!
 3. Click `Show advanced settings` and then click `On Push` under `SCAN ON PUSH`.  This will ensure that the CVE scan will start right after every push to this repository.  And turn on `IMMUTABILITY`. Then click `Create`.
   ![new_repo](img/new_repo.jpg)
 
-4. Repeat this for creating the `ci`/`dc19` `Public` repository with `SCAN ON PUSH` set to `On Push` and `IMMUTABILITY` turned `Off`.
+4. Repeat this for creating the `ci`/`summit19` `Public` repository with `SCAN ON PUSH` set to `On Push` and `IMMUTABILITY` turned `Off`.
 
 5. We should have two repositories now.
   ![new_repo](img/repo_list.jpg)
 
 ### Task 4.1 - Create Promotion Policy - Private to Public
 
-With the two repositories setup we can now define the promotion policy. The first policy we are going to create is for promoting an image that has passed a scan with zero (0) **Critical** vulnerabilities. The policy will target the `ci`/`dc19` repository.
+With the two repositories setup we can now define the promotion policy. The first policy we are going to create is for promoting an image that has passed a scan with zero (0) **Critical** vulnerabilities. The policy will target the `ci`/`summit19` repository.
 
-1. Navigate to the `ci`/`dc19_build` repository. Click `Promotions` and click `New promotion policy`. Note: Make sure the `Is source` box is
+1. Navigate to the `ci`/`summit19_build` repository. Click `Promotions` and click `New promotion policy`. Note: Make sure the `Is source` box is
 selected.
   ![create](img/create_policy.jpg)
 
 2. In the `PROMOTE TO TARGET IF...` box select `Critical Vulnerabilities` and then check `less than or equals`. In the box below `equals` enter the number zero (4) and click `Add`.
-3. Set the `TARGET REPOSITORY` to `ci`/`dc19` and click `Save & Apply`.
+3. Set the `TARGET REPOSITORY` to `ci`/`summit19` and click `Save & Apply`.
   ![promo](img/promo_policy.jpg)
 
-When we push an image to `ci`/`dc19_build` it will get scanned. Based on that scan report we could see the image moved to `ci`/`dc19`. Lets push a few images to see if it worked.
+When we push an image to `ci`/`summit19_build` it will get scanned. Based on that scan report we could see the image moved to `ci`/`summit19`. Lets push a few images to see if it worked.
 
 ## Task 5 - Pull / Tag / Push Docker Image
 
@@ -296,46 +238,11 @@ In order to push and pull images to DTR we will need to take advantage of PWD's 
 
     If you are not sure please follow [Task 1.1 Set Up Environment Variables](#task-11---set-up-environment-variables).
 
-4. Now we login to our DTR server using your `DTR_TOKEN` from [Task 3.3 Create Jenkins DTR Token](#task-33---create-jenkins-dtr-token).
-
-    ```bash
-    docker login -u jenkins -p $DTR_TOKEN $DTR_URL
-    ```
-
-5. Now we can start pulling a few images.
-
-    ```bash
-    docker pull clemenko/dc19:0.1
-    docker pull clemenko/dc19:0.2
-    docker pull clemenko/dc19:0.3
-    docker pull alpine
-    ```
-
-    This command is pull a few images from [hub.docker.com](https://hub.docker.com).
-
-6. Now let's tag the image for our DTR instance. We will use the `URL` variable we set before.
-
-    ```bash
-    docker tag clemenko/dc19:0.1 $DTR_URL/ci/dc19_build:0.1
-    docker tag clemenko/dc19:0.2 $DTR_URL/ci/dc19_build:0.2
-    docker tag clemenko/dc19:0.3 $DTR_URL/ci/dc19_build:0.3
-    docker tag alpine $DTR_URL/ci/dc19_build:alpine
-    ```
-
-7. Now we can `docker push` the images to DTR.
-
-    ```bash
-    docker push $DTR_URL/ci/dc19_build:0.1
-    docker push $DTR_URL/ci/dc19_build:0.2
-    docker push $DTR_URL/ci/dc19_build:0.3
-    docker push $DTR_URL/ci/dc19_build:alpine
-    ```
-
 ## Task 6 - Review Scan Results
 
 Lets take a good look at the scan results from the images. Please keep in mind this will take a few minutes to complete.
 
-1. Navigate to DTR --> `Repositories` --> `ci/dc19_build` --> `Tags`.
+1. Navigate to DTR --> `Repositories` --> `ci/summit19_build` --> `Tags`.
 
     Don't worry if you see images in a `Scanning...` or `Pending` state. Please click to another tab and click back.
 
@@ -379,7 +286,7 @@ This not only allows you to mirror images but also allows you to create image pr
 
 1. Go to [hub.docker.com](https://hub.docker.com) and create an login and repository.
 
-2. Navigate to `Repositories` --> `ci`/`dc19` --> `MIRRORS` --> `New mirror`.
+2. Navigate to `Repositories` --> `ci`/`summit19` --> `MIRRORS` --> `New mirror`.
    Change the `REGISTRY TYPE` to `Docker Hub` and fill out the relevant information like:
 
    ![mirror1](img/mirror.jpg)
@@ -402,24 +309,24 @@ We can create policy enforcement within Universal Control Plane (UCP) such that 
 
 Let's sign your first Docker image?
 
-1. Right now you should have a promoted image `$DTR_URL/ci/dc19:0.2`. We need to tag it with a new `signed` tag.
+1. Right now you should have a promoted image `$DTR_URL/ci/summit19:0.2`. We need to tag it with a new `signed` tag.
 
    ```bash
-   docker pull $DTR_URL/ci/dc19:0.2
-   docker tag $DTR_URL/ci/dc19:0.2 $DTR_URL/ci/dc19:signed
+   docker pull $DTR_URL/ci/summit19:0.2
+   docker tag $DTR_URL/ci/summit19:0.2 $DTR_URL/ci/summit19:signed
    ```
 
 2. Now lets use the Trust command... It will ask you for a BUNCH of passwords. Do yourself a favor in this workshop and use `admin1234`. :D
 
     ```bash
-    docker trust sign $DTR_URL/ci/dc19:signed
+    docker trust sign $DTR_URL/ci/summit19:signed
     ```
 
     Here is an example output:
 
     ```bash
     [worker3] (local) root@10.20.0.42 ~
-    $ docker trust sign $DTR_URL/ci/dc19:signed
+    $ docker trust sign $DTR_URL/ci/summit19:signed
     You are about to create a new root signing key passphrase. This passphrase
     will be used to protect the most sensitive key in your signing system. Please
     choose a long, complex passphrase and be careful to keep the password and the
@@ -433,9 +340,9 @@ Let's sign your first Docker image?
     Enter passphrase for new jenkins key with ID ab5049d:
     Repeat passphrase for new jenkins key with ID ab5049d:
     Created signer: jenkins
-    Finished initializing signed repository for ip172-18-0-5-bfu00sinjdg00099igu0.direct.ee-beta2.play-with-docker.com/ci/dc19:signed
-    Signing and pushing trust data for local image ip172-18-0-5-bfu00sinjdg00099igu0.direct.ee-beta2.play-with-docker.com/ci/dc19:signed, may overwrite remote trust data
-    The push refers to repository [ip172-18-0-5-bfu00sinjdg00099igu0.direct.ee-beta2.play-with-docker.com/ci/dc19]
+    Finished initializing signed repository for ip172-18-0-5-bfu00sinjdg00099igu0.direct.ee-beta2.play-with-docker.com/ci/summit19:signed
+    Signing and pushing trust data for local image ip172-18-0-5-bfu00sinjdg00099igu0.direct.ee-beta2.play-with-docker.com/ci/summit19:signed, may overwrite remote trust data
+    The push refers to repository [ip172-18-0-5-bfu00sinjdg00099igu0.direct.ee-beta2.play-with-docker.com/ci/summit19]
     af9af2170d23: Layer already exists
     cd9a82baa926: Layer already exists
     c60ea83f6a45: Layer already exists
@@ -443,7 +350,7 @@ Let's sign your first Docker image?
     signed: digest: sha256:5554013b565fc0ccf080f7cf4ad096ffb1dbc4f83496a86f9efa1252f26ed455 size: 1156
     Signing and pushing trust metadata
     Enter passphrase for jenkins key with ID ab5049d:
-    Successfully signed ip172-18-0-5-bfu00sinjdg00099igu0.direct.ee-beta2.play-with-docker.com/ci/dc19:signed
+    Successfully signed ip172-18-0-5-bfu00sinjdg00099igu0.direct.ee-beta2.play-with-docker.com/ci/summit19:signed
     [worker3] (local) root@10.20.0.42 ~
     ```
 
@@ -452,17 +359,17 @@ Let's sign your first Docker image?
 3. And we can confirm the signature has been applied by inspecting the image:
 
     ```bash
-    docker trust inspect $DTR_URL/ci/dc19:signed
+    docker trust inspect $DTR_URL/ci/summit19:signed
     ```
 
     Here is the example output:
 
       ```bash
       [worker3] (local) root@10.20.0.42 ~
-      $ docker trust inspect $DTR_URL/ci/dc19:signed
+      $ docker trust inspect $DTR_URL/ci/summit19:signed
       [
         {
-            "Name": "ip172-18-0-5-bfu00sinjdg00099igu0.direct.ee-beta2.play-with-docker.com/ci/dc19:signed",
+            "Name": "ip172-18-0-5-bfu00sinjdg00099igu0.direct.ee-beta2.play-with-docker.com/ci/summit19:signed",
             "SignedTags": [
                 {
                     "SignedTag": "signed",
@@ -495,7 +402,7 @@ Let's sign your first Docker image?
                     "Name": "Repository",
                     "Keys": [
                         {
-                            "ID": "61a14ae35425dde74dc5d18b292c613f613b357051862c18ca5d0a02a2f0d04e"
+                            "ID": "61a14ae35425dde74summit5d18b292c613f613b357051862c18ca5d0a02a2f0d04e"
                         }
                     ]
                 }
@@ -505,15 +412,15 @@ Let's sign your first Docker image?
       [worker3] (local) root@10.20.0.42 ~
       ```
 
-4. Back in DTR, Navigate to `Repositories` --> `ci`/`dc19` --> `Tags` and you will now see the new `signed` tag with the text `Signed` under the `Signed` column:
+4. Back in DTR, Navigate to `Repositories` --> `ci`/`summit19` --> `Tags` and you will now see the new `signed` tag with the text `Signed` under the `Signed` column:
 
     ![promoted](img/promoted_signed.jpg)
 
 5. If you were to enable Docker Content Trust in UCP then you would need to upload the public certificate used to sign the image. As we did not perform the `docker trust signer add` command before step 2 above then a public certificate is automatically generated but is not associated to a user in UCP. This means when UCP tries to verify the signature on a signed image to a user it will fail and therefor not meet UCP's Content Trust policy.
 
-    To resolve this issue you can upload the base64 encoded public certificate in `~/.docker/trust/tuf/$DTR_URL/ci/dc19/metadata/targets.json` - the certificate is located in the structure `.signed.delegations.keys` with the key value of `public`.
+    To resolve this issue you can upload the base64 encoded public certificate in `~/.docker/trust/tuf/$DTR_URL/ci/summit19/metadata/targets.json` - the certificate is located in the structure `.signed.delegations.keys` with the key value of `public`.
 
-    For example, use the command `cat ~/.docker/trust/tuf/$DTR_URL/ci/dc19/metadata/targets.json | jq '.signed.delegations.keys' | grep public` to extract the certificate.
+    For example, use the command `cat ~/.docker/trust/tuf/$DTR_URL/ci/summit19/metadata/targets.json | jq '.signed.delegations.keys' | grep public` to extract the certificate.
 
 ## Task 9 - Automate with Jenkins
 
@@ -524,20 +431,20 @@ In order to automate we need to deploy Jenkins. If you want I can point you to a
 1. Take a look at the script. Also notice the script will check variables, and then runs `docker run`.
 
     ```bash
-    cat ./dc19_supply_chain/scripts/jenkins.sh
+    cat ./fedsummit_19/scripts/jenkins.sh
     ```
 
 2. Then run unset Docker Content Trust and instal Jenkins.
 
     ```bash
-    ./dc19_supply_chain/scripts/jenkins.sh
+    ./fedsummit_19/scripts/jenkins.sh
     ```
 
 3. Pay attention to the url AND Jenkins password. It will look like :
 
     ```bash
     [worker3] (local) root@10.20.0.25 ~/
-    $ dc19_supply_chain/scripts/jenkins.sh
+    $ fedsummit_19/scripts/jenkins.sh
     =========================================================================================================
 
       Jenkins URL : http://ip172-18-0-20-bcelih5dffhg00b2thog.direct.ee-beta2.play-with-docker.com:8080
@@ -580,7 +487,7 @@ Now that we have Jenkins setup and running we need to add 3 additional plugins -
 3. Click on `New item` in the upper left.
   ![newitem](img/jenkins_newitem.jpg)
 
-4. Enter a name like `ci_dc19`, click `Freestyle project` and then click `OK`.
+4. Enter a name like `ci_summit19`, click `Freestyle project` and then click `OK`.
   ![time](img/jenkins_item.jpg)
 
 5. Let's scroll down to the `Build` section. We will come back to the `Build Triggers` section in a bit. Now click `Add build step` --> `Execute shell`.
@@ -596,13 +503,13 @@ Now that we have Jenkins setup and running we need to add 3 additional plugins -
 
     docker login -u admin -p admin1234 $DTR_URL
 
-    docker pull clemenko/dc19:0.2
+    docker pull clemenko/summit19:0.2
 
-    docker tag clemenko/dc19:0.2 $DTR_URL/ci/dc19_build:jenkins_$BUILD_NUMBER
+    docker tag clemenko/summit19:0.2 $DTR_URL/ci/summit19_build:jenkins_$BUILD_NUMBER
 
-    docker push $DTR_URL/ci/dc19_build:jenkins_$BUILD_NUMBER
+    docker push $DTR_URL/ci/summit19_build:jenkins_$BUILD_NUMBER
 
-    docker rmi clemenko/dc19:0.2 $DTR_URL/ci/dc19_build:jenkins_$BUILD_NUMBER
+    docker rmi clemenko/summit19:0.2 $DTR_URL/ci/summit19_build:jenkins_$BUILD_NUMBER
     ```
 
     It will look very similar to:
@@ -619,22 +526,22 @@ Now that we have Jenkins setup and running we need to add 3 additional plugins -
 9. The console output will show you all the details from the script execution.
   ![output](img/jenkins_output.jpg)
 
-10. Review the `ci`/`dc19` repository in DTR. You should now see a bunch of tags that have been promoted.
+10. Review the `ci`/`summit19` repository in DTR. You should now see a bunch of tags that have been promoted.
   ![supply](img/automated_supply.jpg)
 
 ### Task 9.3 - Webhooks
 
 Now that we have Jenkins setup we can extend with webhooks. In Jenkins speak a webhook is simply a build trigger. Let's configure one.
 
-1. Navigate to Jenkins and click on the project/item called `ci_dc19` and click on `Configure` on the left hand side.
+1. Navigate to Jenkins and click on the project/item called `ci_summit19` and click on `Configure` on the left hand side.
   ![configure](img/jenkins_configure.jpg)
 
-2. Then scroll down to `Build Triggers`. Check the checkbox for `Trigger builds remotely` and enter a Token of `dc19_rocks`.  Scroll down and click `Save`.
+2. Then scroll down to `Build Triggers`. Check the checkbox for `Trigger builds remotely` and enter a Token of `summit19_rocks`.  Scroll down and click `Save`.
   ![trigger](img/jenkins_triggers.jpg)
 
-3. Now in your browser goto YOUR `http://$DOCS_URL:8080/job/ci_dc19/build?token=dc19_rocks`
+3. Now in your browser goto YOUR `http://$DOCS_URL:8080/job/ci_summit19/build?token=summit19_rocks`
 
-    It should look like: `http://ip172-18-0-9-bis91vft0fgg00ctq3i0.direct.ee-beta2.play-with-docker.com:8080/job/ci_dc19/build?token=dc19_rocks`
+    It should look like: `http://ip172-18-0-9-bis91vft0fgg00ctq3i0.direct.ee-beta2.play-with-docker.com:8080/job/ci_summit19/build?token=summit19_rocks`
 
 4. Check DTR to verify the images were pushed. Then log into `https:hub.docker.com` to see if your images were mirrored.
 
