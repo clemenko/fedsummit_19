@@ -128,10 +128,10 @@ Now your PWD environment variables are setup. We will use the variables for some
 
 ## Task 2 - Enable Docker Image Scanning
 
-Before we create the repositories, let's start with enabling the Docker Image Scanning engine. Good thing there is a scrip for that.
+Before we create the repositories, let's start with enabling the Docker Image Scanning engine. Good thing there is a script for that.
 
 ```bash
-source fedsummit_19/scripts/enable_scanning.sh
+./fedsummit_19/scripts/enable_scanning.sh
 ```
 
 ## Task 3 - Create Jenkins User and Organization
