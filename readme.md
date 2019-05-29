@@ -1,11 +1,5 @@
 # Building a Secure, Automated Supply Chain - Mid Atlantic Summit 2019
 
-## Who am i
-
-* Github : [https://github.com/clemenko](https://github.com/clemenko)
-* Twitter : [@clemenko](https://twitter.com/clemenko)
-* Email : [clemenko@docker.com](mailto:clemenko@docker.com)
-
 ---
 
 In this lab you will integrate Docker Enterprise in to your development pipeline. You will push an image to the Docker Trusted Registry (DTR). DTR will scan your image for vulnerabilities so they can be fixed before your application is deployed. This helps you build more secure apps!
@@ -43,6 +37,12 @@ In this lab you will integrate Docker Enterprise in to your development pipeline
 >   * [Task 9.2 Plumb Jenkins](#task-92---plumb-jenkins)
 >   * [Task 9.3 Webhooks](#task-93---webhooks)
 > * [Conclusion](#conclusion)
+
+## Who am i
+
+* Github : [https://github.com/clemenko](https://github.com/clemenko)
+* Twitter : [@clemenko](https://twitter.com/clemenko)
+* Email : [clemenko@docker.com](mailto:clemenko@docker.com)
 
 ## Document conventions
 
