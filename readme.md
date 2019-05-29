@@ -6,7 +6,7 @@ In this lab you will integrate Docker Enterprise in to your development pipeline
 >
 > **Time**: Approximately 30 minutes
 >
-> **Tasks**:
+> **Table of Contents**:
 >
 > * [Who am i](#who-am-i)
 > * [Document conventions](#document-conventions)
