@@ -75,8 +75,8 @@ There are three main components to the Play With Docker (PWD) interface.
 
 Play with Docker provides access to the 3 Docker Enterprise hosts in your Cluster. These machines are:
 
-* A Linux-based Docker Enterprise 2.1 (UCP 3.1.6 & DTR 2.6.5 & 18.09.2)  Manager node
-* Three Linux-based Docker Enterprise 2.1 (18.09.2) Worker nodes
+* A Linux-based Docker Enterprise 2.2 (UCP 3.1.6 & DTR 2.6.5 & 18.09.2)  Manager node
+* Three Linux-based Docker Enterprise 2.2 (18.09.3) Worker nodes
 
 By clicking a name on the left, the console window will be connected to that node.
 
