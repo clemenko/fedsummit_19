@@ -1,7 +1,5 @@
 # Building a Secure, Automated Supply Chain - Mid Atlantic Summit 2019
 
----
-
 In this lab you will integrate Docker Enterprise in to your development pipeline. You will push an image to the Docker Trusted Registry (DTR). DTR will scan your image for vulnerabilities so they can be fixed before your application is deployed. This helps you build more secure apps!
 
 > **Difficulty**: Beginner
